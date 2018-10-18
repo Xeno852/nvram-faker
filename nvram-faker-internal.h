@@ -2,7 +2,7 @@
 #define __nvram_faker_internal_h
 
 #ifndef INI_FILE_PATH
-#define INI_FILE_PATH "/nvram.ini"
+#define INI_FILE_PATH "./nvram.ini"
 #endif
 
 #ifndef INI_MAX_LINE

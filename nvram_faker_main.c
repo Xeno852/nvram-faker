@@ -13,10 +13,6 @@
 #define NVRAM_EXE
 #endif
 
-//#ifndef INI_FILE_PATH
-#define INI_FILE_PATH "./nvram.ini"
-//#endif
-
 #include "nvram-faker-internal.h"
 
 extern void initialize_ini(void);

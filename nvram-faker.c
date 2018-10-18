@@ -104,7 +104,25 @@ void end(void)
     return;
 }
 
-char *nvram_get(const char *key)
+void nvram_init(void *fp)
+{
+    LOG_PRINTF("Init called.\n");
+    return;
+}
+
+void nvram_commit(void *unused, void *unused2)
+{
+    LOG_PRINTF("Commit called.\n");
+    return;
+}
+
+void nvram_close(void *unused)
+{
+    LOG_PRINTF("Close called.\n");
+    return;
+}
+
+char *get(const char *key)
 {
     int i;
     int found=0;
@@ -133,4 +151,62 @@ char *nvram_get(const char *key)
     return ret;
 }
 
+char *nvram_get(const char *key)
+{
+    return get(key);
+}
 
+
+char *nvram_bufget(const void *nothing, const char *key)
+{
+    return get(key);
+}
+
+int set(const char *key, const char *value)
+{
+    int i;
+    int found=0;
+    int ret = -1;
+
+    if(NULL == key)
+    {
+        LOG_PRINTF("Set called with NULL key.\n");
+    }
+
+    if (NULL == value)
+    {
+        LOG_PRINTF("Set called with NULL value for %s.\n",key);
+    }
+
+    for(i=0;i<kv_count;i+=2)
+    {
+        if(strcmp(key,key_value_pairs[i]) == 0)
+        {
+            LOG_PRINTF("Changing %s=%s to ",key,key_value_pairs[i+1]);
+            found = 1;
+            free(key_value_pairs[i+1]);
+            key_value_pairs[i+1] = strdup(value);
+            LOG_PRINTF("%s=%s\n",key,key_value_pairs[i+1]);
+            break;
+        }
+    }
+
+    if(!found)
+    {
+            LOG_PRINTF( RED_ON"%s not found.\n"RED_OFF,key);
+    }else
+    {
+            ret = 0;
+    }
+    return ret;
+}
+
+int nvram_set(const char *key, const char *value)
+{
+    return set(key, value);
+}
+
+int nvram_bufset(const void *unused, const char *key, const char *value)
+{
+    return set(key, value);
+}
