@@ -18,10 +18,14 @@
 extern void initialize_ini(void);
 extern void end(void);
 
+char *nvram_bufget(const void *, const char *);
+
 int main(void)
 {
+    char *mac = flash_read_mac(NULL);
     DEBUG_PRINTF("calling initalize_ini().\n");
     initialize_ini();
+    nvram_bufget(NULL, "idontexits");
     DEBUG_PRINTF("calling end().\n");
     end();
     DEBUG_PRINTF("Done.\n");

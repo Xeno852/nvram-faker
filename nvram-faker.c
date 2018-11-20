@@ -13,6 +13,7 @@
 static int kv_count=0;
 static int key_value_pair_len=DEFAULT_KV_PAIR_LEN;
 static char **key_value_pairs=NULL;
+static char *EMPTY_STR = "";
 
 static int ini_handler(void *user, const char *section, const char *name,const char *value)
 {
@@ -116,6 +117,11 @@ void nvram_commit(void *unused, void *unused2)
     return;
 }
 
+void nvram_clear(void *unused)
+{
+    LOG_PRINTF("Clear called.\n");
+}
+
 void nvram_close(void *unused)
 {
     LOG_PRINTF("Close called.\n");
@@ -143,6 +149,7 @@ char *get(const char *key)
     if(!found)
     {
             LOG_PRINTF( RED_ON"%s=Unknown\n"RED_OFF,key);
+            return EMPTY_STR;
     }else
     {
 
@@ -151,7 +158,8 @@ char *get(const char *key)
     return ret;
 }
 
-char *nvram_get(const char *key)
+char *nvram_get(const void *nothing, const char *key)
+//char *nvram_get(const char *key)
 {
     return get(key);
 }
@@ -201,7 +209,8 @@ int set(const char *key, const char *value)
     return ret;
 }
 
-int nvram_set(const char *key, const char *value)
+int nvram_set(const void *unused, const char *key, const char *value)
+//int nvram_set(const char *key, const char *value)
 {
     return set(key, value);
 }
@@ -209,4 +218,34 @@ int nvram_set(const char *key, const char *value)
 int nvram_bufset(const void *unused, const char *key, const char *value)
 {
     return set(key, value);
+}
+
+int getNvramIndex(const char *key)
+{
+    // Looking for an NVRAM index, anything other than -1 is acceptable.
+    // Most times this value is passed to init which is ignored anyway.
+    return 1;
+}
+
+int getNvramNum()
+{
+    // Return value specific to the current router I'm looking at.
+    return 4;
+}
+
+char *getNvramName(const int index)
+{
+    if(0 > index)
+    {
+        LOG_PRINTF("Invalid index provided.\n");
+        return NULL;
+    }
+
+    if(index > kv_count)
+    {
+        LOG_PRINTF("Index %d out of range\n", index);
+        return NULL;
+    }
+
+    return key_value_pairs[index];
 }
