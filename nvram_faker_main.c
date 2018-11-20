@@ -22,7 +22,6 @@ char *nvram_bufget(const void *, const char *);
 
 int main(void)
 {
-    char *mac = flash_read_mac(NULL);
     DEBUG_PRINTF("calling initalize_ini().\n");
     initialize_ini();
     nvram_bufget(NULL, "idontexits");
