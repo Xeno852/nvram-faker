@@ -11,9 +11,9 @@ void nvram_close(void *unused);
  Here and in nvram-faker.c
 ****************************************************/
 char *nvram_get(const void *unused, const char *key);
-int nvram_set(const void *unused, const char *key, const char *value);
+//int nvram_set(const void *unused, const char *key, const char *value);
 //char *nvram_get(const char *key);
-//int nvram_set(const char *key, const char *value);
+int nvram_set(const char *key, const char *value);
 
 char *nvram_bufget(const void *unused, const char *key);
 int nvram_bufset(const void *unused, const char *key, const char *value);

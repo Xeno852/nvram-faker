@@ -15,48 +15,54 @@ static int key_value_pair_len=DEFAULT_KV_PAIR_LEN;
 static char **key_value_pairs=NULL;
 static char *EMPTY_STR = "";
 
-static int ini_handler(void *user, const char *section, const char *name,const char *value)
+static int extend_list(void **user)
 {
-
-    int old_kv_len;
+    char **new_kv = NULL;
+    int old_kv_len = 0;
+    int i = 0;
     char **kv;
-    char **new_kv;
-    int i;
-    
-    if(NULL == user || NULL == section || NULL == name || NULL == value)
-    {
-        DEBUG_PRINTF("bad parameter to ini_handler\n");
-        return 0;
-    }
-    kv = *((char ***)user);
+
+    kv = **((char ****)user);
     if(NULL == kv)
     {
         LOG_PRINTF("kv is NULL\n");
         return 0;
     }
-    
+
+    old_kv_len=key_value_pair_len;
+    key_value_pair_len=(key_value_pair_len * 2);
+    new_kv=(char **)malloc(key_value_pair_len * sizeof(char **));
+    if(NULL == *kv)
+    {
+        LOG_PRINTF("Failed to reallocate key value array.\n");
+        return 0;
+    }
+    for(i=0;i<old_kv_len;i++)
+    {
+        new_kv[i] = (kv)[i];
+    }
+    free(**(char ****)user);
+    kv=new_kv;
+    **(char ****)user=kv;
+    return 0;
+}
+
+static int ini_handler(void *user, const char *section, const char *name,const char *value)
+{
+    if(NULL == user || NULL == section || NULL == name || NULL == value)
+    {
+        DEBUG_PRINTF("bad parameter to ini_handler\n");
+        return 0;
+    }
+
     DEBUG_PRINTF("kv_count: %d, key_value_pair_len: %d\n", kv_count,key_value_pair_len);
     if(kv_count >= key_value_pair_len)
     {
-        old_kv_len=key_value_pair_len;
-        key_value_pair_len=(key_value_pair_len * 2);
-        new_kv=(char **)malloc(key_value_pair_len * sizeof(char **));
-        if(NULL == kv)
-        {
-            LOG_PRINTF("Failed to reallocate key value array.\n");
-            return 0;
-        }
-        for(i=0;i<old_kv_len;i++)
-        {
-            new_kv[i]=kv[i];
-        }
-        free(*(char ***)user);
-        kv=new_kv;
-        *(char ***)user=kv;
+        extend_list(&user);
     }
     DEBUG_PRINTF("Got %s:%s\n",name,value);
-    kv[kv_count++]=strdup(name);
-    kv[kv_count++]=strdup(value);
+    (*((char ***)user))[kv_count++]=strdup(name);
+    (*((char ***)user))[kv_count++]=strdup(value);
     
     return 1;
 }
@@ -174,7 +180,6 @@ int set(const char *key, const char *value)
 {
     int i;
     int found=0;
-    int ret = -1;
 
     if(NULL == key)
     {
@@ -201,16 +206,20 @@ int set(const char *key, const char *value)
 
     if(!found)
     {
-            LOG_PRINTF( RED_ON"%s not found.\n"RED_OFF,key);
-    }else
-    {
-            ret = 0;
+        if(kv_count >= key_value_pair_len)
+        {
+            extend_list((void **)&key_value_pairs);
+        }
+        key_value_pairs[kv_count++] = strdup(key);
+        key_value_pairs[kv_count++] = strdup(value);
+        LOG_PRINTF("Setting %s=%s\n",key_value_pairs[i],key_value_pairs[i+1]);
     }
-    return ret;
+
+    return 0;
 }
 
-int nvram_set(const void *unused, const char *key, const char *value)
-//int nvram_set(const char *key, const char *value)
+//int nvram_set(const void *unused, const char *key, const char *value)
+int nvram_set(const char *key, const char *value)
 {
     return set(key, value);
 }
