@@ -2,51 +2,36 @@
 
 export ARCH=mipsel
 TARGET=$1
-
-# Sets up toolchain environment variables for various mips toolchain
+# Change the below to your personal toolchain directory
+TOOLCHAIN_DIR="/usr/mipsel-linux-gnu"
 
 warn()
 {
 	echo "$1" >&2
 }
 
-if [ ! -z $(which mipsel-linux-gcc) ];
-then
-	export CC=$(which mipsel-linux-gcc)
-else
-	warn "Not setting CC: can't locate mipsel-linux-gcc."
+if [ ! -d "$TOOLCHAIN_DIR" ]; then
+    warn "Toolchain directory $TOOLCHAIN_DIR not found."
+    exit 1
 fi
 
-if [ ! -z $(which mipsel-linux-ld) ];
-then
-	export LD=$(which mipsel-linux-ld)
-else
-	warn "Not setting LD: can't locate mipsel-linux-ld."
+TOOLCHAIN_BIN_DIR="$TOOLCHAIN_DIR/bin"
+
+if [ ! -d "$TOOLCHAIN_BIN_DIR" ]; then
+    warn "Toolchain bin directory $TOOLCHAIN_BIN_DIR not found."
+    exit 1
 fi
 
-if [ ! -z $(which mipsel-linux-ar) ];
-then
-	export AR=$(which mipsel-linux-ar)
-else
-	warn "Not setting AR: can't locate mipsel-linux-ar."
-fi
+export PATH="$TOOLCHAIN_BIN_DIR:$PATH"
 
+export CC="gcc"
 
-if [ ! -z $(which mipsel-linux-strip) ];
-then
-	export STRIP=$(which mipsel-linux-strip)
-else
-	warn "Not setting STRIP: can't locate mipsel-linux-strip."
-fi
+export LD="ld"
 
-if [ ! -z $(which mipsel-linux-nm) ];
-then
-	export NM=$(which mipsel-linux-nm)
-else
-	warn "Not setting NM: can't lcoate mipsel-linux-nm."
-fi
+export AR="ar"
 
+export STRIP="strip"
+
+export NM="nm"
 
 make $TARGET || exit $?
-
-
